@@ -47,6 +47,10 @@ CLAUDE.md
 .vscode/
 package-lock.json
 
+# Binary assets (managed locally, not needed for Snack)
+assets/fonts/
+assets/images/
+
 # typescript
 *.tsbuildinfo
 
