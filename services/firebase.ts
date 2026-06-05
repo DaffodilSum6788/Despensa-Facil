@@ -1,10 +1,8 @@
 import { initializeApp } from 'firebase/app';
-import { initializeAuth } from 'firebase/auth';
+// @ts-ignore
+import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-// @ts-ignore - getReactNativePersistence is exported from the RN bundle
-import { getReactNativePersistence } from '@firebase/auth/dist/rn/index.js';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyB9-mON61M7vxRKOWLejoAof20-k64DgBo',
