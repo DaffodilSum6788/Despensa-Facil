@@ -41,6 +41,12 @@ _bmad-output/
 AGENTS.md
 CLAUDE.md
 
+# IDE / tool config
+.claude/
+.github/
+.vscode/
+package-lock.json
+
 # typescript
 *.tsbuildinfo
 
