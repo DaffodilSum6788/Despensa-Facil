@@ -1,16 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
   Modal,
+  FlatList,
 } from 'react-native';
-import DraggableFlatList, {
-  RenderItemParams,
-  ScaleDecorator,
-} from 'react-native-draggable-flatlist';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { FontAwesome } from '@expo/vector-icons';
 import { Colors } from '@/constants/Colors';
 import { Category } from '@/types/category';
@@ -31,6 +27,10 @@ export function ReorderCategoriesModal({
   const [data, setData] = useState<Category[]>(categories);
   const [saving, setSaving] = useState(false);
 
+  useEffect(() => {
+    if (visible) setData(categories);
+  }, [visible, categories]);
+
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -43,35 +43,55 @@ export function ReorderCategoriesModal({
     }
   };
 
-  const renderItem = ({ item, drag, isActive }: RenderItemParams<Category>) => (
-    <ScaleDecorator>
-      <TouchableOpacity
-        activeOpacity={0.7}
-        onLongPress={drag}
-        disabled={isActive}
-        style={[styles.item, isActive && styles.itemActive]}
-      >
-        <FontAwesome name="bars" size={16} color={Colors.gray} />
-        <Text style={styles.itemText}>{item.name}</Text>
-      </TouchableOpacity>
-    </ScaleDecorator>
+  const moveUp = (index: number) => {
+    if (index === 0) return;
+    const newData = [...data];
+    [newData[index - 1], newData[index]] = [newData[index], newData[index - 1]];
+    setData(newData);
+  };
+
+  const moveDown = (index: number) => {
+    if (index === data.length - 1) return;
+    const newData = [...data];
+    [newData[index], newData[index + 1]] = [newData[index + 1], newData[index]];
+    setData(newData);
+  };
+
+  const renderItem = ({ item, index }: { item: Category; index: number }) => (
+    <View style={styles.item}>
+      <Text style={styles.itemText}>{item.name}</Text>
+      <View style={styles.arrows}>
+        <TouchableOpacity
+          onPress={() => moveUp(index)}
+          disabled={index === 0}
+          style={[styles.arrowBtn, index === 0 && styles.arrowDisabled]}
+        >
+          <FontAwesome name="chevron-up" size={14} color={index === 0 ? Colors.border : Colors.primary} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => moveDown(index)}
+          disabled={index === data.length - 1}
+          style={[styles.arrowBtn, index === data.length - 1 && styles.arrowDisabled]}
+        >
+          <FontAwesome name="chevron-down" size={14} color={index === data.length - 1 ? Colors.border : Colors.primary} />
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 
   return (
     <Modal visible={visible} animationType="slide">
-      <GestureHandlerRootView style={{ flex: 1 }}>
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.title}>Reordenar Categorias</Text>
-          <Text style={styles.subtitle}>Segure e arraste para reordenar</Text>
+          <Text style={styles.subtitle}>Use as setas para reordenar</Text>
         </View>
 
-        <DraggableFlatList
+        <FlatList
           data={data}
-          onDragEnd={({ data: newData }) => setData(newData)}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
-          containerStyle={styles.list}
+          contentContainerStyle={styles.list}
         />
 
         <View style={styles.footer}>
@@ -87,7 +107,6 @@ export function ReorderCategoriesModal({
           </TouchableOpacity>
         </View>
       </View>
-      </GestureHandlerRootView>
     </Modal>
   );
 }
@@ -113,28 +132,33 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   list: {
-    flex: 1,
     paddingHorizontal: 20,
   },
   item: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: Colors.white,
     borderRadius: 8,
     padding: 16,
     marginBottom: 8,
     borderWidth: 1,
     borderColor: Colors.border,
-    gap: 12,
-  },
-  itemActive: {
-    backgroundColor: '#eef4fd',
-    borderColor: Colors.primary,
   },
   itemText: {
     fontSize: 15,
     color: Colors.text,
     fontWeight: '500',
+  },
+  arrows: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  arrowBtn: {
+    padding: 6,
+  },
+  arrowDisabled: {
+    opacity: 0.4,
   },
   footer: {
     flexDirection: 'row',
